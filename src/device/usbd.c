@@ -258,7 +258,7 @@ static inline usbd_class_driver_t const * get_driver(uint8_t drvid)
   }
 
   // Built-in drivers
-  if (drvid < BUILTIN_DRIVER_COUNT) return &_usbd_driver[drvid];
+  // if (drvid < BUILTIN_DRIVER_COUNT) return &_usbd_driver[drvid];
 
   return NULL;
 }
