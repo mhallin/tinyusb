@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../../hw/bsp/family_support.cmake)
 
-# gets PROJECT name for the example (e.g. <BOARD>-<DIR_NAME>)
+# gets PROJECT name for the example
 family_get_project_name(PROJECT ${CMAKE_CURRENT_LIST_DIR})
 
 project(${PROJECT})
@@ -15,7 +15,6 @@ add_executable(${PROJECT})
 # Example source
 target_sources(${PROJECT} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/usb_descriptors.c
         )
 
 # Example include
@@ -25,4 +24,7 @@ target_include_directories(${PROJECT} PUBLIC
 
 # Configure compilation flags and libraries for the example... see the corresponding function
 # in hw/bsp/FAMILY/family.cmake for details.
-family_configure_device_example(${PROJECT})
+family_configure_host_example(${PROJECT})
+
+# For rp2040, un-comment to enable pico-pio-usb
+# family_add_pico_pio_usb(${PROJECT})
