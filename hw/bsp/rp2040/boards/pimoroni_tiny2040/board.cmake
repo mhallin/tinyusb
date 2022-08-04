@@ -1,0 +1,1 @@
+set(PICO_BOARD pimoroni_tiny2040)

@@ -27,7 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hal/include/hal_gpio.h"
+// #include "hal/include/hal_gpio.h"
+#include "pico/stdlib.h"
 #include "bsp/board.h"
 #include "tusb.h"
 #include "device/usbd_pvt.h"
@@ -37,6 +38,15 @@ uint8_t endpoint_in=0;
 uint8_t endpoint_out=0;
 
 bool btn_last=0;
+
+#define PIN_IN_UP 26
+#define PIN_IN_RIGHT 27
+#define PIN_IN_DOWN 28
+#define PIN_IN_LEFT 29
+#define PIN_IN_Y 7
+#define PIN_IN_B 6
+#define PIN_IN_X 5
+#define PIN_IN_A 4
 
 static void sendReportData(void) {
 
@@ -54,29 +64,38 @@ static void sendReportData(void) {
       tud_remote_wakeup();
     }
 
-    bool dpad_up = !gpio_get_pin_level(PIN_PA02);
-    bool dpad_right = !gpio_get_pin_level(PIN_PB08);
-    bool dpad_down = !gpio_get_pin_level(PIN_PB09);
-    bool dpad_left = !gpio_get_pin_level(PIN_PA04);
+    // bool dpad_up = !gpio_get_pin_level(PIN_PA02);
+    // bool dpad_right = !gpio_get_pin_level(PIN_PB08);
+    // bool dpad_down = !gpio_get_pin_level(PIN_PB09);
+    // bool dpad_left = !gpio_get_pin_level(PIN_PA04);
 
-    bool btn_y = !gpio_get_pin_level(PIN_PA05);
-    bool btn_b = !gpio_get_pin_level(PIN_PB02);
-    bool btn_a = !gpio_get_pin_level(PIN_PB11);
-    bool btn_x = !gpio_get_pin_level(PIN_PB10);
+    // bool btn_y = !gpio_get_pin_level(PIN_PA05);
+    // bool btn_b = !gpio_get_pin_level(PIN_PB02);
+    // bool btn_a = !gpio_get_pin_level(PIN_PB11);
+    // bool btn_x = !gpio_get_pin_level(PIN_PB10);
+
+    bool dpad_up = !gpio_get(PIN_IN_UP);
+    bool dpad_right = !gpio_get(PIN_IN_RIGHT);
+    bool dpad_down = !gpio_get(PIN_IN_DOWN);
+    bool dpad_left = !gpio_get(PIN_IN_LEFT);
+    bool btn_y = !gpio_get(PIN_IN_Y);
+    bool btn_b = !gpio_get(PIN_IN_B);
+    bool btn_a = !gpio_get(PIN_IN_X);
+    bool btn_x = !gpio_get(PIN_IN_A);
 
     bool btn = dpad_up || dpad_right || dpad_down || dpad_left || btn_y || btn_b || btn_a || btn_x;
 
-    uint8_t btn_1 =
+    uint8_t btn_1 = (uint8_t)(
       (dpad_up ? 0x01 : 0x00)
       | (dpad_down ? 0x02 : 0x00)
       | (dpad_left ? 0x04 : 0x00)
-      | (dpad_right ? 0x08 : 0x00);
+      | (dpad_right ? 0x08 : 0x00));
 
-    uint8_t btn_2 =
+    uint8_t btn_2 = (uint8_t)(
       (btn_a ? 0x10 : 0x00)
       | (btn_b ? 0x20 : 0x00)
       | (btn_x ? 0x40 : 0x00)
-      | (btn_y ? 0x80 : 0x00);
+      | (btn_y ? 0x80 : 0x00));
 
     bool change =
       XboxButtonData.digital_buttons_1 != btn_1
@@ -102,23 +121,56 @@ static void sendReportData(void) {
 int main(void) {
   board_init();
 
-  gpio_set_pin_direction(PIN_PA02, GPIO_DIRECTION_IN);
-  gpio_set_pin_direction(PIN_PB08, GPIO_DIRECTION_IN);
-  gpio_set_pin_direction(PIN_PB09, GPIO_DIRECTION_IN);
-  gpio_set_pin_direction(PIN_PA04, GPIO_DIRECTION_IN);
-  gpio_set_pin_direction(PIN_PA05, GPIO_DIRECTION_IN);
-  gpio_set_pin_direction(PIN_PB02, GPIO_DIRECTION_IN);
-  gpio_set_pin_direction(PIN_PB11, GPIO_DIRECTION_IN);
-  gpio_set_pin_direction(PIN_PB10, GPIO_DIRECTION_IN);
+  uint8_t pins[] = {
+    PIN_IN_UP,
+    PIN_IN_RIGHT,
+    PIN_IN_DOWN,
+    PIN_IN_LEFT,
+    PIN_IN_Y,
+    PIN_IN_B,
+    PIN_IN_X,
+    PIN_IN_A,
+  };
+  int pin_count = sizeof(pins)/sizeof(*pins);
 
-  gpio_set_pin_pull_mode(PIN_PA02, GPIO_PULL_UP);
-  gpio_set_pin_pull_mode(PIN_PB08, GPIO_PULL_UP);
-  gpio_set_pin_pull_mode(PIN_PB09, GPIO_PULL_UP);
-  gpio_set_pin_pull_mode(PIN_PA04, GPIO_PULL_UP);
-  gpio_set_pin_pull_mode(PIN_PA05, GPIO_PULL_UP);
-  gpio_set_pin_pull_mode(PIN_PB02, GPIO_PULL_UP);
-  gpio_set_pin_pull_mode(PIN_PB11, GPIO_PULL_UP);
-  gpio_set_pin_pull_mode(PIN_PB10, GPIO_PULL_UP);
+  for (int i = 0; i < pin_count; ++i) {
+    uint8_t pin = pins[i];
+    gpio_init(pin);
+    gpio_set_dir(pin, GPIO_IN);
+    gpio_pull_up(pin);
+  }
+
+  // board_led_on();
+
+  gpio_init(18);
+  gpio_set_dir(18, GPIO_OUT);
+  gpio_put(18, 1);
+
+  gpio_init(19);
+  gpio_set_dir(19, GPIO_OUT);
+  gpio_put(19, 1);
+
+  gpio_init(20);
+  gpio_set_dir(20, GPIO_OUT);
+  gpio_put(20, 1);
+
+  // gpio_set_pin_direction(PIN_PA02, GPIO_DIRECTION_IN);
+  // gpio_set_pin_direction(PIN_PB08, GPIO_DIRECTION_IN);
+  // gpio_set_pin_direction(PIN_PB09, GPIO_DIRECTION_IN);
+  // gpio_set_pin_direction(PIN_PA04, GPIO_DIRECTION_IN);
+  // gpio_set_pin_direction(PIN_PA05, GPIO_DIRECTION_IN);
+  // gpio_set_pin_direction(PIN_PB02, GPIO_DIRECTION_IN);
+  // gpio_set_pin_direction(PIN_PB11, GPIO_DIRECTION_IN);
+  // gpio_set_pin_direction(PIN_PB10, GPIO_DIRECTION_IN);
+
+  // gpio_set_pin_pull_mode(PIN_PA02, GPIO_PULL_UP);
+  // gpio_set_pin_pull_mode(PIN_PB08, GPIO_PULL_UP);
+  // gpio_set_pin_pull_mode(PIN_PB09, GPIO_PULL_UP);
+  // gpio_set_pin_pull_mode(PIN_PA04, GPIO_PULL_UP);
+  // gpio_set_pin_pull_mode(PIN_PA05, GPIO_PULL_UP);
+  // gpio_set_pin_pull_mode(PIN_PB02, GPIO_PULL_UP);
+  // gpio_set_pin_pull_mode(PIN_PB11, GPIO_PULL_UP);
+  // gpio_set_pin_pull_mode(PIN_PB10, GPIO_PULL_UP);
 
   tusb_init();
   while (1) {
@@ -139,7 +191,7 @@ static void xinput_reset(uint8_t __unused rhport) {
 
 static uint16_t xinput_open(uint8_t __unused rhport, tusb_desc_interface_t const *itf_desc, uint16_t max_len) {
   //+16 is for the unknown descriptor
-  uint16_t const drv_len = sizeof(tusb_desc_interface_t) + itf_desc->bNumEndpoints*sizeof(tusb_desc_endpoint_t) + 16;
+  uint16_t const drv_len = (uint16_t)(sizeof(tusb_desc_interface_t) + itf_desc->bNumEndpoints*sizeof(tusb_desc_endpoint_t) + 16);
   TU_VERIFY(max_len >= drv_len, 0);
 
   uint8_t const * p_desc = tu_desc_next(itf_desc);
